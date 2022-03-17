@@ -1,6 +1,6 @@
 package com.superyuuki.yuukomponents.traits;
 
-public interface Ctx {
+public interface Context {
 
     void cancel();
 

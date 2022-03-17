@@ -1,29 +1,34 @@
 package com.superyuuki.yuukomponents.minecraft.item;
 
+import com.superyuuki.yuukomponents.api.Component;
 import com.superyuuki.yuukomponents.api.Event;
 import com.superyuuki.yuukomponents.minecraft.core.Components;
-import com.superyuuki.yuukomponents.minecraft.item.system.SystemContextImpl;
-import com.superyuuki.yuukomponents.minecraft.item.system.System;
+import com.superyuuki.yuukomponents.minecraft.feature.Feature;
+import com.superyuuki.yuukomponents.minecraft.feature.FeatureContextImpl;
 
 import java.util.List;
 
-public class ItemImpl implements Item {
+public class ItemImpl implements Component<Components> {
 
-    private final List<System> systems;
+    private final List<Feature> features;
 
-    public ItemImpl(List<System> systems) {
-        this.systems = systems;
+    public ItemImpl(List<Feature> features) {
+        this.features = features;
     }
 
-
     @Override
-    public Event generic(Components root, Event untyped) {
-        Event top = untyped;
+    public boolean generic(Components root, Event untyped) {
 
-        for (System system : systems) {
-            top = system.generic(new SystemContextImpl(root, this), top);
+        for (Feature feature : features) {
+            boolean proceed = feature.generic(
+                    new FeatureContextImpl(root, this),
+                    untyped
+            );
+
+            if (!proceed) return false;
         }
 
-        return top;
+        return true;
+
     }
 }

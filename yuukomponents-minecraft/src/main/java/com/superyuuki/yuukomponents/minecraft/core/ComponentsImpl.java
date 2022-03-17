@@ -1,8 +1,9 @@
 package com.superyuuki.yuukomponents.minecraft.core;
 
+import com.superyuuki.yuukomponents.api.Component;
 import com.superyuuki.yuukomponents.api.Event;
-import com.superyuuki.yuukomponents.minecraft.ItemConstructor;
-import com.superyuuki.yuukomponents.minecraft.item.Item;
+import com.superyuuki.yuukomponents.minecraft.item.ItemConstructor;
+import com.superyuuki.yuukomponents.minecraft.item.VoidItemComponent;
 
 import java.util.Map;
 import java.util.UUID;
@@ -10,26 +11,15 @@ import java.util.concurrent.ConcurrentHashMap;
 
 public class ComponentsImpl implements Components { //it doesnt care
 
-    private final Map<UUID, Item> compUUIDs = new ConcurrentHashMap<>(); //mutable component block
+    private final Map<UUID, Component<Components>> compUUIDs = new ConcurrentHashMap<>(); //mutable component block
 
     @Override
-    public Event generic(Void root, Event untyped) {
-        Event cur = untyped;
-
+    public boolean generic(Void root, Event untyped) {
         for (var entry : compUUIDs.entrySet()) {
-            cur = entry.getValue().generic(this, untyped);
+            entry.getValue().generic(this, untyped);
         }
 
-        return cur;
-    }
-
-    @Override
-    public Event fire(UUID uuid, Event event) {
-
-        var comp = compUUIDs.get(uuid);
-        if (comp == null) return event;
-
-        return comp.generic(this, event);
+        return true;
     }
 
     @Override
@@ -40,8 +30,15 @@ public class ComponentsImpl implements Components { //it doesnt care
                 uuid,
                 constructor.construct(uuid)
         );
+    }
 
+    @Override
+    public Component<Void> item(UUID uuid) {
+        Component<Components> item = compUUIDs.get(uuid);
 
+        if (item == null) throw new IllegalArgumentException("No such item with uuid: " + uuid);
+
+        return new VoidItemComponent(this, item);
     }
 
 }
